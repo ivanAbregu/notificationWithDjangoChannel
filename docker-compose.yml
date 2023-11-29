@@ -1,0 +1,31 @@
+version: '3.1'
+services:
+  db:
+    image: postgres:12
+    container_name: db
+    env_file: ./docker/.env
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - 6379:6379
+
+  backend-notification:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    image: backend-notification
+    container_name: backend-notification
+    command: bash -c "sleep 4 && sh ./docker/entrypoint.sh"
+    env_file:
+      - ./docker/.env
+    volumes:
+      - .:/code
+    ports:
+      - 80:80
+    ######### stdin_open and tty to debug
+    stdin_open: true
+    tty: true
+    links:
+      - db
+      - redis
